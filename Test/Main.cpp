@@ -30,11 +30,8 @@ void OutputTime(time_t time)
 	printf("%s\n", buffer);
 }
 
-int main()
+void TestBlock(const wchar_t* path)
 {
-	auto path = L"example.iproj";
-	system("chcp 65001 > nul"); // 设置控制台为UTF-8编码
-
 	INIWeaverProject p;
 	p.Load(LoadFileToByteVector(path));
 
@@ -91,6 +88,27 @@ int main()
 			printf("  Link To Size: %zu\n", mod.GetLinkGroup_LinkTo().size());
 		}
 	}
+}
+
+void TestStream(const wchar_t* path)
+{
+	INIWeaverProjectStreamer streamer;
+	streamer.Load(LoadFileToByteVector(path));
+
+	for (const auto& line : streamer.StreamLines())
+	{
+		printf("%s\n", line.c_str());
+	}
+}
+
+int main()
+{
+	auto path = L"example.iproj";
+	system("chcp 65001 > nul"); // 设置控制台为UTF-8编码
+
+	//TestBlock(path);
+
+	TestStream(path);
 
 	return 0;
 }

@@ -1,11 +1,10 @@
 ﻿#include "LibIProj.h"
 #include "ByteStream.h"
+#include <ranges>
 
 bool INIWeaverProject::LoadClip()
 {
-	ByteInputStream stm;
-	stm.Set(std::move(SProj.Data));
-	stm.SetVersion(GetClipFormatVersion(GetCreateVersion()));
+	ByteInputStream& stm = SProj.Data;
 	stm >> Clip;
 	return stm.Success();
 }
@@ -337,4 +336,107 @@ const PairClipString& INIWeaverModule::GetIncludedBySection() const
 const std::vector<PairClipString>& INIWeaverModule::GetIncludingSections() const
 {
 	return ModData->IncludingSections;
+}
+
+
+
+bool INIWeaverProjectStreamer::Load(LPCVOID* data, size_t size)
+{
+	ByteInputStream stm;
+	stm.Set(data, size);
+	stm >> SProj;
+	return stm.Success();
+}
+
+bool INIWeaverProjectStreamer::Load(const std::vector<BYTE>& data)
+{
+	ByteInputStream stm;
+	stm.Set(data);
+	stm >> SProj;
+	return stm.Success();
+}
+
+bool INIWeaverProjectStreamer::Load(std::vector<BYTE>&& data)
+{
+	ByteInputStream stm;
+	stm.Set(std::move(data));
+	stm >> SProj;
+	return stm.Success();
+}
+
+std::generator<ModuleClipData&> INIWeaverProjectStreamer::StreamModules()
+{
+	auto& stm = SProj.Data;
+	stm.Rewind();
+	stm >> ProjectRID;
+
+	uint32_t x;
+	stm >> x;
+	stm.Seek(int(stm.GetSizeTypeSize() - sizeof(uint32_t)), SEEK_CUR); // align if needed
+	for (uint32_t i = 0; i < x; i++)
+	{
+		stm >> Mod;
+		if (!stm.Success()) co_return;
+		co_yield Mod;
+	}
+}
+
+std::unordered_map<std::string, std::string> IniWeaverTypetoWICType = {
+	{ "Rules", "rule" },
+	{ "Art", "art" },
+	{ "AI", "ai" },
+	{ "Sound", "sound" },
+	{ "Eva", "eva" },
+	{ "UI", "ui" },
+};
+
+std::generator<std::string> INIWeaverProjectStreamer::StreamLines()
+{
+	for (const auto& mod : StreamModules())
+	{
+		// output if !IsLinkGroup && !IsComment && !Ignore
+		if (mod.IsComment || mod.IsLinkGroup || mod.Ignore) continue;
+		// process Desc Inherit Register Lines
+		/*
+		Format :
+		[Desc.Sec]:[Inherit.0]
+		...
+		[Desc.Sec]:[Inherit.N]
+		@Type= rule/art/sound etc.
+		Lines[0].Key = Lines[0].Value
+		...
+		Lines[N].Key = Lines[N].Value
+
+		[Register]
+		Desc.Sec=Desc.Sec
+		*/
+		//Inherit is comma separated
+		if (mod.Inherit.empty())
+		{
+			co_yield "[" + mod.Desc.B + "]";
+		}
+		else
+		{
+			auto InheritNames = mod.Inherit | std::views::split(',') | std::views::transform([](auto&& rng)
+				{
+					return std::string(&*rng.begin(), std::ranges::distance(rng));
+				});
+			for (const auto& inheritName : InheritNames)
+			{
+				co_yield "[" + mod.Desc.B + "]:" + inheritName;
+			}
+		}
+		if (IniWeaverTypetoWICType.contains(mod.Desc.A))
+		{
+			co_yield "@Type=" + IniWeaverTypetoWICType[mod.Desc.A];
+		}
+		for (const auto& line : mod.Lines)
+		{
+			co_yield line.Key + " = " + line.Value;
+		}
+		co_yield "";
+		co_yield "[" + mod.Register + "]";
+		co_yield mod.Desc.B + "=" + mod.Desc.B;
+		co_yield "";
+	}
 }

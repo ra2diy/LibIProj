@@ -14,6 +14,7 @@ private:
     bool UseAlign;
     size_t SizeTypeSize;
 public:
+
     void Init(LPBYTE begin)
     {
         Cursor = Begin = begin;
@@ -117,6 +118,7 @@ ByteInputStream& operator>>(ByteInputStream& stm, PairClipString& v);
 ByteInputStream& operator>>(ByteInputStream& stm, PairClipOnShow& v);
 ByteInputStream& operator>>(ByteInputStream& stm, ModuleClipData& v);
 ByteInputStream& operator>>(ByteInputStream& stm, ClipBoardData& v);
+ByteInputStream& operator>>(ByteInputStream& stm, ByteInputStream& v);
 
 template<typename T>
 ByteInputStream& operator>>(ByteInputStream& stm, std::vector<T>& v)

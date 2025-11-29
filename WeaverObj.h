@@ -4,6 +4,7 @@
 #include <utility>
 #include <cstdint>
 #include <windows.h>
+#include "ByteStream.h"
 
 struct FVec2
 {
@@ -58,7 +59,7 @@ struct IBS_Project
     int CreateVersionMajor, CreateVersionMinor, CreateVersionRelease;
     float FullView_Ratio;
     FVec2 FullView_EqCenter;
-    std::vector<BYTE> Data;
+    ByteInputStream Data;
 };
 
 struct PairClipString

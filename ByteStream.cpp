@@ -144,15 +144,15 @@ ByteInputStream& operator>>(ByteInputStream& stm, IBS_Project& v)
                 }
                 else if (RealVersion >= 204)
                 {
-					stm >> v.CreateTime
-					    >> v.CreateVersionMajor
-					    >> v.CreateVersionMinor
-					    >> v.CreateVersionRelease
-					    >> v.FullView_Ratio
-					    >> v.FullView_EqCenter
-					    >> v.LastOutputDir
-					    >> v.LastOutputIniName
-					    >> v.Data;
+                    stm >> v.CreateTime
+                        >> v.CreateVersionMajor
+                        >> v.CreateVersionMinor
+                        >> v.CreateVersionRelease
+                        >> v.FullView_Ratio
+                        >> v.FullView_EqCenter
+                        >> v.LastOutputDir
+                        >> v.LastOutputIniName;
+                    stm >> v.Data;
 				}
                 else if (RealVersion >= 203)
                 {
@@ -162,8 +162,8 @@ ByteInputStream& operator>>(ByteInputStream& stm, IBS_Project& v)
                         >> v.CreateVersionRelease
                         >> v.FullView_Ratio
                         >> v.FullView_EqCenter
-                        >> v.LastOutputDir
-                        >> v.Data;
+                        >> v.LastOutputDir;
+                    stm >> v.Data;
                 }
                 else
                 {
@@ -172,11 +172,13 @@ ByteInputStream& operator>>(ByteInputStream& stm, IBS_Project& v)
                         >> v.CreateVersionMinor
                         >> v.CreateVersionRelease
                         >> v.FullView_Ratio
-                        >> v.FullView_EqCenter
-                        >> v.Data;
+                        >> v.FullView_EqCenter;
+                    stm >> v.Data;
                 }
+				auto CreateVersion = v.CreateVersionMajor * 10000 + v.CreateVersionMinor * 100 + v.CreateVersionRelease;
+                v.Data.SetVersion(GetClipFormatVersion(CreateVersion));
             }
-			stm.Seek(int(Pos + IntBuf2), SEEK_SET);
+            stm.Seek(int(Pos + IntBuf2), SEEK_SET);
         }
     }
 
@@ -186,6 +188,7 @@ ByteInputStream& operator>>(ByteInputStream& stm, IBS_Project& v)
 
 ByteInputStream& operator>>(ByteInputStream& stm, ModuleClipData& v)
 {
+    if (!stm.Success())return stm;
     stm >> v.IsLinkGroup;
     if (!v.IsLinkGroup)
     {
@@ -257,6 +260,16 @@ ByteInputStream& operator>>(ByteInputStream& stm, ModuleClipData& v)
 
 ByteInputStream& operator>>(ByteInputStream& stm, ClipBoardData& v)
 {
+    if (!stm.Success())return stm;
     stm >> v.ProjectRID >> v.Modules;
+	return stm;
+}
+
+ByteInputStream& operator>>(ByteInputStream& stm, ByteInputStream& v)
+{
+    if (!stm.Success())return stm;
+    std::vector<BYTE> vec;
+    stm >> vec;
+    v.Set(std::move(vec));
 	return stm;
 }

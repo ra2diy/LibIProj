@@ -2,6 +2,8 @@
 #include "WeaverObj.h"
 #include <unordered_map>
 #include <ctime>
+#include <coroutine>
+#include <generator>
 
 const int constexpr IPROJ_HeaderSign = 0x00114514;
 
@@ -107,4 +109,18 @@ public :
 	const INIWeaverModule* GetModuleByDesc(const std::string& INI, const std::string& Section) const;
 	const INIWeaverModule* GetModuleByDisplayName(const std::string& displayName) const;
 
+};
+
+class INIWeaverProjectStreamer
+{
+	IBS_Project SProj;
+	uint32_t ProjectRID;
+	ModuleClipData Mod;
+public:
+	bool Load(LPCVOID* data, size_t size);
+	bool Load(const std::vector<BYTE>& data);
+	bool Load(std::vector<BYTE>&& data);
+
+	std::generator<ModuleClipData&> StreamModules();
+	std::generator<std::string> StreamLines();
 };
