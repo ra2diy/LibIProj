@@ -122,5 +122,11 @@ public:
 	bool Load(std::vector<BYTE>&& data);
 
 	std::generator<ModuleClipData&> StreamModules();
+	
+	/*
+	Note : Different from Export INI in INIWeaver.
+	Since there is no RegisterTypes Config File.
+	*/
 	std::generator<std::string> StreamLines();
+	std::generator<std::string> StreamLines_CollectRegister();
 };

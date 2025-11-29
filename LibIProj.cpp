@@ -440,3 +440,46 @@ std::generator<std::string> INIWeaverProjectStreamer::StreamLines()
 		co_yield "";
 	}
 }
+
+std::generator<std::string> INIWeaverProjectStreamer::StreamLines_CollectRegister()
+{
+	std::unordered_map<std::string, std::vector<std::string>> RegisterCollection;
+	for (const auto& mod : StreamModules())
+	{
+		if (mod.IsComment || mod.IsLinkGroup || mod.Ignore) continue;
+		RegisterCollection[mod.Register].push_back(mod.Desc.B);
+		if (mod.Inherit.empty())
+		{
+			co_yield "[" + mod.Desc.B + "]";
+		}
+		else
+		{
+			auto InheritNames = mod.Inherit | std::views::split(',') | std::views::transform([](auto&& rng)
+				{
+					return std::string(&*rng.begin(), std::ranges::distance(rng));
+				});
+			for (const auto& inheritName : InheritNames)
+			{
+				co_yield "[" + mod.Desc.B + "]:" + inheritName;
+			}
+		}
+		if (IniWeaverTypetoWICType.contains(mod.Desc.A))
+		{
+			co_yield "@Type=" + IniWeaverTypetoWICType[mod.Desc.A];
+		}
+		for (const auto& line : mod.Lines)
+		{
+			co_yield line.Key + " = " + line.Value;
+		}
+		co_yield "";
+	}
+	for (auto& [Name, Arr] : RegisterCollection)
+	{
+		co_yield "[" + Name + "]";
+		for (auto& str : Arr)
+		{
+			co_yield str + "=" + str;
+		}
+		co_yield "";
+	}
+}

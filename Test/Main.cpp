@@ -87,6 +87,7 @@ void TestBlock(const wchar_t* path)
 		{
 			printf("  Link To Size: %zu\n", mod.GetLinkGroup_LinkTo().size());
 		}
+		printf("\n");
 	}
 }
 
