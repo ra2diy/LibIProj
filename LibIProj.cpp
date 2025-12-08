@@ -340,7 +340,7 @@ const std::vector<PairClipString>& INIWeaverModule::GetIncludingSections() const
 
 
 
-bool INIWeaverProjectStreamer::Load(LPCVOID* data, size_t size)
+bool INIWeaverProjectStreamer::Load(LPCVOID data, size_t size)
 {
 	ByteInputStream stm;
 	stm.Set(data, size);
