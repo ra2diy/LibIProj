@@ -9,10 +9,10 @@ bool INIWeaverProject::LoadClip()
 	return stm.Success();
 }
 
-bool INIWeaverProject::Load(LPCVOID* data, size_t size)
+bool INIWeaverProject::Load(LPCVOID* data, size_t size, bool Clone)
 {
 	ByteInputStream stm;
-	stm.Set(data, size);
+	stm.Set(data, size, Clone);
 	stm >> SProj;
 	return stm.Success() && LoadClip() && BuildSearchTable();
 }
@@ -340,10 +340,10 @@ const std::vector<PairClipString>& INIWeaverModule::GetIncludingSections() const
 
 
 
-bool INIWeaverProjectStreamer::Load(LPCVOID data, size_t size)
+bool INIWeaverProjectStreamer::Load(LPCVOID data, size_t size, bool Clone)
 {
 	ByteInputStream stm;
-	stm.Set(data, size);
+	stm.Set(data, size, Clone);
 	stm >> SProj;
 	return stm.Success();
 }

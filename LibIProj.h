@@ -80,7 +80,7 @@ class INIWeaverProject
 	bool LoadClip();
 public :
 
-	bool Load(LPCVOID* data, size_t size);
+	bool Load(LPCVOID* data, size_t size, bool Clone);
 
 	bool Load(const std::vector<BYTE>& data);
 
@@ -117,7 +117,7 @@ class INIWeaverProjectStreamer
 	uint32_t ProjectRID;
 	ModuleClipData Mod;
 public:
-	bool Load(LPCVOID data, size_t size);
+	bool Load(LPCVOID data, size_t size, bool Clone);
 	bool Load(const std::vector<BYTE>& data);
 	bool Load(std::vector<BYTE>&& data);
 
