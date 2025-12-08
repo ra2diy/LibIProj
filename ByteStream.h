@@ -87,9 +87,18 @@ public:
 		Init(Buffer.data(), Buffer.size());
 	}
 
-	void Set(LPCVOID data, size_t size)
+	void Set(LPCVOID data, size_t size, bool Clone)
 	{
-		Init((LPBYTE)data, size);
+        if (Clone)
+        {
+            Buffer.resize(size);
+            memcpy(Buffer.data(), data, size);
+			Init(Buffer.data(), Buffer.size());
+        }
+        else
+        {
+            Init((LPBYTE)data, size);
+        }
 	}
 
 	void NoAlign() { UseAlign = false; }
