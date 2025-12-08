@@ -121,6 +121,9 @@ public:
 	bool Load(const std::vector<BYTE>& data);
 	bool Load(std::vector<BYTE>&& data);
 
+	IBS_Project& GetSProj() { return SProj; }
+	const IBS_Project& GetSProj() const { return SProj; }
+
 	std::generator<ModuleClipData&> StreamModules();
 	
 	/*
