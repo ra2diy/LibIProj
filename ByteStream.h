@@ -9,15 +9,17 @@ private:
     std::vector<BYTE> Buffer;
     LPBYTE Begin;
     LPBYTE Cursor;
+    LPBYTE End;
     int ClipFormatVersion;
     bool _Success;
     bool UseAlign;
     size_t SizeTypeSize;
 public:
 
-    void Init(LPBYTE begin)
+    void Init(LPBYTE begin, size_t Size)
     {
         Cursor = Begin = begin;
+		End = Begin + Size;
         _Success = true;
 		UseAlign = true;
 		SizeTypeSize = 4;
@@ -30,6 +32,10 @@ public:
 
     LPBYTE GetByte(size_t MoveAfterRead)
     {
+		if (Cursor + MoveAfterRead > End)
+		{
+			MoveAfterRead = size_t(End - Cursor);
+		}
         LPBYTE Cur2 = Cursor;
         Cursor += MoveAfterRead;
         return Cur2;
@@ -44,6 +50,11 @@ public:
 	size_t Position() const
 	{
 		return Cursor - Begin;
+	}
+
+	bool Eof() const
+	{
+		return Cursor >= End;
 	}
 
     template<typename T>
@@ -67,20 +78,18 @@ public:
     void Set(const std::vector<BYTE>& Vec)
     {
         Buffer = Vec;
-        Init(Buffer.data());
+        Init(Buffer.data(), Buffer.size());
     }
 
 	void Set(std::vector<BYTE>&& Vec)
 	{
 		Buffer = std::move(Vec);
-		Init(Buffer.data());
+		Init(Buffer.data(), Buffer.size());
 	}
 
 	void Set(LPCVOID data, size_t size)
 	{
-		Buffer.resize(size);
-		memcpy(Buffer.data(), data, size);
-		Init(Buffer.data());
+		Init((LPBYTE)data, size);
 	}
 
 	void NoAlign() { UseAlign = false; }
