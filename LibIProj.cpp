@@ -460,7 +460,7 @@ std::generator<std::string> INIWeaverProjectStreamer::StreamLines_CollectRegiste
 				});
 			for (const auto& inheritName : InheritNames)
 			{
-				co_yield "[" + mod.Desc.B + "]:" + inheritName;
+				co_yield "[" + mod.Desc.B + "]:[" + inheritName + "]";
 			}
 		}
 		if (IniWeaverTypetoWICType.contains(mod.Desc.A))
